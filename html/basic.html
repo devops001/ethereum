@@ -2,13 +2,48 @@
 <head>
 <title>basic</title>
 
-<style> 
-  table { background-color: black;}
-  th    { background-color: #ddd; color: #123;}
-  td    { background-color: white; }
+<style>
+  table  { background-color: black; }
+  th     { background-color: #ddd; color: #123;}
+  td     { background-color: white; }
+  #debug { font-family: monospace;  }
+  .box   { padding: 2px; margin: 2em; border: 1px solid black; }
 </style>
 
 <script type="text/javascript">
+
+function puts(obj) {
+  var text = JSON.stringify(obj, null, 4);
+  document.getElementById('debug').innerText = text;
+}
+
+var contracts = {
+  redEyes: {
+    address : "0xacaa4c37f7ffb8f5f1c97f1cbccb0f57d78647f6",
+    get     : "0x4ff7eb1f",
+    del     : "0xaf34664b",
+    put     : "0xfc9e91e0"
+  },
+  trashCoin: {
+    address      : "0x963efda6b94800ab10ad25efb3b350d0f8417408",
+    checkBalance : "0x5f515226",
+    sendCoin     : "0x90b98a11",
+    returnCoins  : "0x9b56cd8b"
+  }
+};
+
+function updateTrashCoinOutput() {
+  var contract = web3.eth.storageAt(contracts.trashCoin.address);
+  var keys     = Object.keys(contract);
+  var html     = "<tr><th>Account</th><th>Balance</th></tr>";
+  // first key is createdBy, others are accounts
+  for (var i=1; i<keys.length; i++) {
+    html += "<tr><td>"+ keys[i] +"</td><td>"+ web3.toDecimal(contract[keys[i]]) +"</td></tr>";
+  }
+  document.getElementById('trashCoinCreator').innerHTML = contract[keys[0]];
+  document.getElementById('trashCoinBalances').innerHTML = html;
+  puts(contract);
+}
 
 web3.eth.watch('chain').changed(function() {
   var coinbase = web3.eth.coinbase;
@@ -16,14 +51,15 @@ web3.eth.watch('chain').changed(function() {
   document.getElementById('address').innerText = coinbase;
   document.getElementById('balance').innerText = web3.toDecimal(balance);
 });
-  
+
 web3.eth.watch('pending').changed(function() {
   var blockNumber = web3.eth.number;
   var timestamp   = web3.eth.block(blockNumber).timestamp;
   var hash        = web3.eth.block(blockNumber).hash;
   document.getElementById('blockNumber').innerText = blockNumber;
   document.getElementById('timestamp').innerText   = timestamp;
-  document.getElementById('hash').innerText        = hash;  
+  document.getElementById('hash').innerText        = hash;
+  updateTrashCoinOutput();
 });
 
 </script>
@@ -36,5 +72,15 @@ web3.eth.watch('pending').changed(function() {
     <tr><th>Timestamp:</th><td id="timestamp"></td></tr>
     <tr><th>Hash:     </th><td id="hash"></td></tr>
   </table>
+
+  <hr/>
+
+  <h3>TrashCoin</h3>
+  <p>Created by: <span id="trashCoinCreator"></span></p>
+  <table id="trashCoinBalances"></table>
+
+  <hr/>
+
+  <div id="debug"></div>
 </body>
 </html>
