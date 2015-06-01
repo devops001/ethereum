@@ -1,0 +1,40 @@
+<html>
+<head>
+<title>basic</title>
+
+<style> 
+  table { background-color: black;}
+  th    { background-color: #ddd; color: #123;}
+  td    { background-color: white; }
+</style>
+
+<script type="text/javascript">
+
+web3.eth.watch('chain').changed(function() {
+  var coinbase = web3.eth.coinbase;
+  var balance  = web3.eth.balanceAt(coinbase);
+  document.getElementById('address').innerText = coinbase;
+  document.getElementById('balance').innerText = web3.toDecimal(balance);
+});
+  
+web3.eth.watch('pending').changed(function() {
+  var blockNumber = web3.eth.number;
+  var timestamp   = web3.eth.block(blockNumber).timestamp;
+  var hash        = web3.eth.block(blockNumber).hash;
+  document.getElementById('blockNumber').innerText = blockNumber;
+  document.getElementById('timestamp').innerText   = timestamp;
+  document.getElementById('hash').innerText        = hash;  
+});
+
+</script>
+</head>
+<body>
+  <table>
+    <tr><th>Address:  </th><td id="address"></td></tr>
+    <tr><th>Balance:  </th><td id="balance"></td></tr>
+    <tr><th>Block #:  </th><td id="blockNumber"></td></tr>
+    <tr><th>Timestamp:</th><td id="timestamp"></td></tr>
+    <tr><th>Hash:     </th><td id="hash"></td></tr>
+  </table>
+</body>
+</html>
