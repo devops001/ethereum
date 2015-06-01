@@ -3,11 +3,10 @@
 <title>basic</title>
 
 <style>
+  html   { font-family: monospace;  }
   table  { background-color: black; }
   th     { background-color: #ddd; color: #123;}
   td     { background-color: white; }
-  #debug { font-family: monospace;  }
-  .box   { padding: 2px; margin: 2em; border: 1px solid black; }
 </style>
 
 <script type="text/javascript">
@@ -33,15 +32,32 @@ var contracts = {
 };
 
 function updateTrashCoinOutput() {
-  var contract = web3.eth.storageAt(contracts.trashCoin.address);
-  var keys     = Object.keys(contract);
-  var html     = "<tr><th>Account</th><th>Balance</th></tr>";
+  var contract     = web3.eth.storageAt(contracts.trashCoin.address);
+  var keys         = Object.keys(contract);
+  var html         = "<tr><th>Account</th><th>Coins</th></tr>";
+  var totalBalance = 0;
   // first key is createdBy, others are accounts
   for (var i=1; i<keys.length; i++) {
-    html += "<tr><td>"+ keys[i] +"</td><td>"+ web3.toDecimal(contract[keys[i]]) +"</td></tr>";
+    var account   = keys[i];
+    var balance   = web3.toDecimal(contract[keys[i]]);
+    html         += "<tr><td>"+ account +"</td><td>"+ balance +"</td></tr>";
+    totalBalance += parseInt(balance);
   }
-  document.getElementById('trashCoinCreator').innerHTML = contract[keys[0]];
+  document.getElementById('trashCoinCreator').innerHTML  = contract[keys[0]];
   document.getElementById('trashCoinBalances').innerHTML = html;
+  document.getElementById('trashCoinTotalBalance').innerHTML = totalBalance;
+}
+
+function updateRedEyesOutput() {
+  var contract = web3.eth.storageAt(contracts.redEyes.address);
+  var keys     = Object.keys(contract);
+  var html     = "<tr><th>Key</th><th>Value</th></tr>";
+  for (var i=0; i<keys.length; i++) {
+    var key = web3.toAscii(keys[i]);
+    var val = web3.toAscii(contract[keys[i]]);
+    html += "<tr><td>"+ key +"</td><td>"+ val +"</td></tr>";
+  }
+  document.getElementById('redEyesOutput').innerHTML = html;
   puts(contract);
 }
 
@@ -50,6 +66,8 @@ web3.eth.watch('chain').changed(function() {
   var balance  = web3.eth.balanceAt(coinbase);
   document.getElementById('address').innerText = coinbase;
   document.getElementById('balance').innerText = web3.toDecimal(balance);
+  updateTrashCoinOutput();
+  updateRedEyesOutput();
 });
 
 web3.eth.watch('pending').changed(function() {
@@ -59,27 +77,43 @@ web3.eth.watch('pending').changed(function() {
   document.getElementById('blockNumber').innerText = blockNumber;
   document.getElementById('timestamp').innerText   = timestamp;
   document.getElementById('hash').innerText        = hash;
-  updateTrashCoinOutput();
 });
 
 </script>
 </head>
 <body>
+
+  <h2>Account:</h2>
   <table>
     <tr><th>Address:  </th><td id="address"></td></tr>
     <tr><th>Balance:  </th><td id="balance"></td></tr>
+  </table>
+
+  <br/><hr>
+
+  <h2>Blockchain:</h2>
+  <table>
     <tr><th>Block #:  </th><td id="blockNumber"></td></tr>
     <tr><th>Timestamp:</th><td id="timestamp"></td></tr>
     <tr><th>Hash:     </th><td id="hash"></td></tr>
   </table>
 
-  <hr/>
+  <br/><hr>
 
-  <h3>TrashCoin</h3>
-  <p>Created by: <span id="trashCoinCreator"></span></p>
+  <h2>TrashCoin contract:</h2>
+  <table>
+    <tr><th>Created By</th><td id="trashCoinCreator"></td></tr>
+    <tr><th>Total Coins</th><td id="trashCoinTotalBalance"></td></tr>
+  </table>
+  <br/>
   <table id="trashCoinBalances"></table>
 
-  <hr/>
+  <br/><hr>
+
+  <h2>RedEyes contract:</h2>
+  <table id="redEyesOutput"></table>
+
+  <br/><hr>
 
   <div id="debug"></div>
 </body>
