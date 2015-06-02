@@ -53,12 +53,12 @@ function updateRedEyesOutput() {
   var keys     = Object.keys(contract);
   var html     = "<tr><th>Key</th><th>Value</th></tr>";
   for (var i=0; i<keys.length; i++) {
-    var key = web3.toAscii(keys[i]);
+    //var key = web3.toAscii(keys[i]);
+    var key = keys[i];
     var val = web3.toAscii(contract[keys[i]]);
     html += "<tr><td>"+ key +"</td><td>"+ val +"</td></tr>";
   }
   document.getElementById('redEyesOutput').innerHTML = html;
-  puts(contract);
 }
 
 web3.eth.watch('chain').changed(function() {
@@ -74,9 +74,14 @@ web3.eth.watch('pending').changed(function() {
   var blockNumber = web3.eth.number;
   var timestamp   = web3.eth.block(blockNumber).timestamp;
   var hash        = web3.eth.block(blockNumber).hash;
+  var difficulty  = web3.eth.block(blockNumber).difficulty;
+  var gaslimit    = web3.eth.block(blockNumber).gaslimit;
+
   document.getElementById('blockNumber').innerText = blockNumber;
   document.getElementById('timestamp').innerText   = timestamp;
   document.getElementById('hash').innerText        = hash;
+  document.getElementById('difficulty').innerText  = web3.toDecimal(difficulty);
+  document.getElementById('gaslimit').innerText    = gaslimit;
 });
 
 </script>
@@ -93,9 +98,11 @@ web3.eth.watch('pending').changed(function() {
 
   <h2>Blockchain:</h2>
   <table>
-    <tr><th>Block #:  </th><td id="blockNumber"></td></tr>
-    <tr><th>Timestamp:</th><td id="timestamp"></td></tr>
-    <tr><th>Hash:     </th><td id="hash"></td></tr>
+    <tr><th>Block #:   </th><td id="blockNumber"></td></tr>
+    <tr><th>Timestamp: </th><td id="timestamp"></td></tr>
+    <tr><th>Hash:      </th><td id="hash"></td></tr>
+    <tr><th>Difficulty:</th><td id="difficulty"></td></tr>
+    <tr><th>Gas Limit: </th><td id="gaslimit"></td></tr>
   </table>
 
   <br/><hr>
